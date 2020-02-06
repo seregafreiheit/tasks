@@ -1,14 +1,7 @@
 package ru.frei.tasks;
 
-import android.app.LoaderManager;
-import android.content.ContentValues;
-import android.content.CursorLoader;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -17,28 +10,29 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import ru.frei.tasks.data.Contract;
-import ru.frei.tasks.data.DBHelper;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+import ru.frei.tasks.data.AppDatabase;
+import ru.frei.tasks.data.TasksEntry;
 
-    private static final int DATA_LOADER = 0;
-    private static SQLiteDatabase mDatabase;
-    static TaskAdapter adapter;
-    RecyclerView rw;
-     static DBHelper dbHelper;
+public class MainActivity extends AppCompatActivity {
+
+
+    private TasksAdapter adapter;
+    private RecyclerView rw;
+
+    private AppDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        dbHelper = new DBHelper(this);
-        mDatabase = dbHelper.getWritableDatabase();
 
         EditText editText = findViewById(R.id.editText);
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -54,58 +48,61 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         });
 
         rw = findViewById(R.id.rw);
-        adapter = new TaskAdapter(this);
+        adapter = new TasksAdapter(this);
         rw.setHasFixedSize(true);
         rw.setLayoutManager(new LinearLayoutManager(this));
         rw.setAdapter(adapter);
 
-        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
-        ItemTouchHelper mItemTouchHelper = new ItemTouchHelper(callback);
-        mItemTouchHelper.attachToRecyclerView(rw);
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
 
-        getLoaderManager().initLoader(DATA_LOADER, null, this);
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull final RecyclerView.ViewHolder viewHolder, int direction) {
+                AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        int position = viewHolder.getAdapterPosition();
+                        List<TasksEntry> tasks = adapter.getTasks();
+                        database.tasksDao().deleteTask(tasks.get(position));
+                    }
+                });
+            }
+        }).attachToRecyclerView(rw);
+
+        database = AppDatabase.getInstance(getApplicationContext());
+        setupViewModel();
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-                getContentResolver().delete(Contract.Entry.CONTENT_URI, null, null);
-        return super.onOptionsItemSelected(item);
-    }
-
-    public static void deleteTask(long id){
-        mDatabase.delete(Contract.Entry.TABLE_NAME, Contract.Entry._ID + "=" + id, null);
-        adapter.swapCursor(getAllItems());
-    }
-
-    private static Cursor getAllItems() {
-        return mDatabase.query(
-                Contract.Entry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-        );
-    }
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-       getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    private void setupViewModel() {
+        MainViewModel viewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        viewModel.getTasks().observe(this, new Observer<List<TasksEntry>>() {
+            @Override
+            public void onChanged(@Nullable List<TasksEntry> tasksEntries) {
+                adapter.setTasks(tasksEntries);
+            }
+        });
     }
 
     private void saveTask() {
         EditText editText = findViewById(R.id.editText);
-        String task = editText.getText().toString().trim();
+        String task = editText.getText().toString();
         if (task.equals("")) {
             Toast.makeText(this, R.string.empty, Toast.LENGTH_SHORT).show();
             return;
         }
-        ContentValues values = new ContentValues();
-        values.put(Contract.Entry.COLUMN_TASK, task);
-        values.put(Contract.Entry.COLUMN_DONE, 0);
 
-        getContentResolver().insert(Contract.Entry.CONTENT_URI, values);
+
+        final TasksEntry tasksEntry = new TasksEntry(task);
+        AppExecutors.getInstance().getDiskIO().execute(new Runnable() {
+            @Override
+            public void run() {
+                database.tasksDao().insertTask(tasksEntry);
+            }
+        });
 
         editText.setText(null);
 
@@ -113,26 +110,5 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 //        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 //        imm.hideSoftInputFromWindow(add.getWindowToken(),
 //                InputMethodManager.HIDE_NOT_ALWAYS);
-    }
-
-    @NonNull
-    @Override
-    public android.content.Loader<Cursor> onCreateLoader(int id, @Nullable Bundle args) {
-        String[] projection = {
-                Contract.Entry._ID,
-                Contract.Entry.COLUMN_TASK,
-                Contract.Entry.COLUMN_DONE
-        };
-        return new CursorLoader(this, Contract.Entry.CONTENT_URI, projection, null, null, null);
-    }
-
-    @Override
-    public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor data) {
-        adapter.swapCursor(data);
-    }
-
-    @Override
-    public void onLoaderReset(android.content.Loader<Cursor> loader) {
-        adapter.swapCursor(null);
     }
 }

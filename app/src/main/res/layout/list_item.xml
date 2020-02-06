@@ -16,6 +16,6 @@
         android:textSize="16sp"
         android:text="what this"
         android:focusable="false"
-        android:focusableInTouchMode="false"/>
+        android:focusableInTouchMode="false" />
 
 </LinearLayout>

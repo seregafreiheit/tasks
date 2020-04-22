@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/navigation"
     app:startDestination="@id/mainFragment">
 
     <fragment
@@ -20,6 +21,7 @@
             android:name="listId"
             app:argType="integer" />
         <action
+            android:id="@+id/actionBottomNavigationToMainFragment"
             app:destination="@id/mainFragment"
             app:launchSingleTop="true"
             app:popUpTo="@id/mainFragment"
@@ -32,6 +34,7 @@
     </dialog>
 
     <action
+        android:id="@+id/actionGlobalMainFragment"
         app:destination="@id/mainFragment"
         app:launchSingleTop="true"
         app:popUpTo="@id/addTaskFragment"

@@ -7,60 +7,75 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
 import ru.frei.tasks.data.TasksEntry;
+import ru.frei.tasks.databinding.ListItemBinding;
 
 public class TasksAdapter extends RecyclerView.Adapter<TasksAdapter.TasksViewHolder> {
 
-    private List<TasksEntry> mTasks;
+    private ItemClickListener itemClickListener;
+    private List<TasksEntry> tasks;
     private Context context;
 
-    public TasksAdapter(Context context) {
+    public TasksAdapter(Context context, ItemClickListener clickListener) {
         this.context = context;
+        itemClickListener = clickListener;
     }
 
     @NonNull
     @Override
     public TasksViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.list_item, parent, false);
-        return new TasksViewHolder(view);
+        LayoutInflater inflater = LayoutInflater.from(context);
+        ListItemBinding binding = DataBindingUtil.inflate(inflater, R.layout.list_item, parent, false);
+        return new TasksViewHolder(binding);
     }
 
     @Override
     public void onBindViewHolder(@NonNull TasksViewHolder holder, int position) {
-
-        TasksEntry tasksEntry = mTasks.get(position);
+        TasksEntry tasksEntry = tasks.get(position);
         String task = tasksEntry.getTask();
-
         holder.tw.setText(task);
     }
 
     @Override
     public int getItemCount() {
-        if (mTasks == null) {
+        if (tasks == null) {
             return 0;
         }
-        return mTasks.size();
+        return tasks.size();
     }
 
     public List<TasksEntry> getTasks() {
-        return mTasks;
+        return tasks;
     }
 
     public void setTasks(List<TasksEntry> list) {
-        mTasks = list;
+        tasks = list;
         notifyDataSetChanged();
     }
 
-    class TasksViewHolder extends RecyclerView.ViewHolder {
+    public interface ItemClickListener {
+        void onItemClickListener(long itemID);
+    }
+
+    class TasksViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private TextView tw;
 
-        public TasksViewHolder(View itemView) {
-            super(itemView);
-            tw = itemView.findViewById(R.id.taskView);
+        public TasksViewHolder(ListItemBinding binding) {
+            super(binding.getRoot());
+            tw = binding.taskView;
+            tw.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            long itemId = tasks.get(getAdapterPosition()).getId();
+            itemClickListener.onItemClickListener(itemId);
+
         }
     }
 }

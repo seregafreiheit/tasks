@@ -1,23 +1,19 @@
 package ru.frei.tasks;
 
-import android.app.Application;
-
-import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.ViewModel;
 
 import java.util.List;
 
 import ru.frei.tasks.data.AppDatabase;
 import ru.frei.tasks.data.TasksEntry;
 
-public class MainViewModel extends AndroidViewModel {
+public class MainViewModel extends ViewModel {
 
     private LiveData<List<TasksEntry>> tasks;
 
-    public MainViewModel(Application application) {
-        super(application);
-        AppDatabase database = AppDatabase.getInstance(this.getApplication());
-        tasks = database.tasksDao().loadAllTasks();
+    public MainViewModel(AppDatabase database, long listId) {
+        tasks = database.tasksDao().loadAllTasksFrom(listId);
     }
 
     public LiveData<List<TasksEntry>> getTasks() {

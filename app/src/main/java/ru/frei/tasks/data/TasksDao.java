@@ -16,6 +16,9 @@ public interface TasksDao {
     @Query("SELECT * FROM tasks ORDER BY id")
     LiveData<List<TasksEntry>> loadAllTasks();
 
+    @Query("SELECT * FROM tasks WHERE list_id = :listId")
+    LiveData<List<TasksEntry>> loadAllTasksFrom(long listId);
+
     @Insert
     void insertTask(TasksEntry taskEntry);
 
@@ -27,5 +30,8 @@ public interface TasksDao {
 
 
     @Query("SELECT * FROM tasks WHERE id = :id")
-    LiveData<TasksEntry> loadTaskById(int id);
+    TasksEntry loadTaskById(long id);
+
+    @Query("DELETE FROM tasks WHERE list_id = :listId")
+    int deleteAllTasksFrom(long listId);
 }

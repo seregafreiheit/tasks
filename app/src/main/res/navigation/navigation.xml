@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:startDestination="@id/mainFragment">
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="ru.frei.tasks.MainFragment"
+        android:label="MainFragment">
+        <argument
+            android:name="listId"
+            android:defaultValue="1"
+            app:argType="integer" />
+    </fragment>
+    <dialog
+        android:id="@+id/bottomNavigationFragment"
+        android:name="ru.frei.tasks.BottomNavigationFragment"
+        android:label="BottomNavigationFragment">
+        <argument
+            android:name="listId"
+            app:argType="integer" />
+        <action
+            app:destination="@id/mainFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/mainFragment"
+            app:popUpToInclusive="true">
+            <argument
+                android:name="listId"
+                android:defaultValue="1" />
+        </action>
+
+    </dialog>
+
+    <action
+        app:destination="@id/mainFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/addTaskFragment"
+        app:popUpToInclusive="true">
+        <argument
+            android:name="listId"
+            android:defaultValue="1"
+            app:argType="integer" />
+    </action>
+    <dialog
+        android:id="@+id/addTaskFragment"
+        android:name="ru.frei.tasks.AddTaskFragment"
+        android:label="AddTaskFragment" />
+    <dialog
+        android:id="@+id/addListFragment"
+        android:name="ru.frei.tasks.AddListFragment"
+        android:label="AddListFragment" />
+</navigation>

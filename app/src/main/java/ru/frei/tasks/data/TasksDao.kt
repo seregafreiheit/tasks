@@ -1,37 +1,32 @@
-package ru.frei.tasks.data;
+package ru.frei.tasks.data
 
-import androidx.lifecycle.LiveData;
-import androidx.room.Dao;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-import androidx.room.Update;
-
-import java.util.List;
+import androidx.lifecycle.LiveData
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
 
 @Dao
-public interface TasksDao {
-
-    @Query("SELECT * FROM tasks ORDER BY id")
-    LiveData<List<TasksEntry>> loadAllTasks();
+interface TasksDao {
 
     @Query("SELECT * FROM tasks WHERE list_id = :listId")
-    LiveData<List<TasksEntry>> loadAllTasksFrom(long listId);
+    fun loadAllTasksFrom(listId: Long): LiveData<List<TasksEntry>>
 
     @Insert
-    void insertTask(TasksEntry taskEntry);
+    suspend fun insertTask(taskEntry: TasksEntry)
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    void updateTask(TasksEntry taskEntry);
+    suspend fun updateTask(taskEntry: TasksEntry)
 
     @Delete
-    void deleteTask(TasksEntry taskEntry);
+    suspend fun deleteTask(taskEntry: TasksEntry)
 
 
     @Query("SELECT * FROM tasks WHERE id = :id")
-    TasksEntry loadTaskById(long id);
+    suspend fun loadTaskById(id: Long): TasksEntry
 
     @Query("DELETE FROM tasks WHERE list_id = :listId")
-    int deleteAllTasksFrom(long listId);
+    suspend fun deleteAllTasksFrom(listId: Long): Int
 }

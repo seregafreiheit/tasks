@@ -1,4 +1,4 @@
-package ru.frei.tasks
+package ru.frei.tasks.data
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase

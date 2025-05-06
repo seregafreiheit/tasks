@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/mainFragment"
-        android:name="ru.frei.tasks.MainFragment"
+        android:name="ru.frei.tasks.presentation.MainFragment"
         android:label="MainFragment">
         <argument
             android:name="listId"
@@ -28,7 +28,7 @@
 
     <dialog
         android:id="@+id/bottomNavigationFragment"
-        android:name="ru.frei.tasks.BottomNavigationFragment"
+        android:name="ru.frei.tasks.presentation.BottomNavigationFragment"
         android:label="BottomNavigationFragment">
         <argument
             android:name="listId"
@@ -37,12 +37,12 @@
 
     <dialog
         android:id="@+id/addTaskFragment"
-        android:name="ru.frei.tasks.AddTaskFragment"
+        android:name="ru.frei.tasks.presentation.AddTaskFragment"
         android:label="AddTaskFragment" />
 
     <dialog
         android:id="@+id/addListFragment"
-        android:name="ru.frei.tasks.AddListFragment"
+        android:name="ru.frei.tasks.presentation.AddListFragment"
         android:label="AddListFragment" />
 
 </navigation>

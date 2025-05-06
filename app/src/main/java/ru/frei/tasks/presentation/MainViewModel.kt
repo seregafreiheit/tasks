@@ -1,18 +1,24 @@
-package ru.frei.tasks
+package ru.frei.tasks.presentation
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import ru.frei.tasks.data.AppDatabase
 import ru.frei.tasks.data.ListsEntry
 import ru.frei.tasks.data.TasksEntry
+import javax.inject.Inject
 
-class MainViewModel(private val database: AppDatabase) : ViewModel() {
+@HiltViewModel
+class MainViewModel @Inject constructor(
+    private val database: AppDatabase
+) : ViewModel() {
 
-    val lists = database.listsDao().loadAllLists()
-
+    fun getListsLiveData(): LiveData<List<ListsEntry>> {
+        return database.listsDao().loadAllLists()
+    }
 
     fun getTasksLiveData(listId: Long): LiveData<List<TasksEntry>> {
         return database.tasksDao().loadAllTasksFrom(listId)

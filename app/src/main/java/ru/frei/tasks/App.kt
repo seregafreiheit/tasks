@@ -1,8 +1,7 @@
 package ru.frei.tasks
 
 import android.app.Application
-import ru.frei.tasks.data.AppDatabase
+import dagger.hilt.android.HiltAndroidApp
 
-class App : Application() {
-    val database: AppDatabase by lazy { AppDatabase.buildDatabase(this) }
-}
+@HiltAndroidApp
+class App : Application()
